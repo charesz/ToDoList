@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Kanban</title>
+    <title>Kanban - Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
@@ -10,7 +10,7 @@
             margin:0;
             padding:0;
             box-sizing:border-box;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
 
         body{
@@ -32,6 +32,7 @@
         .login-container h2{
             text-align:center;
             margin-bottom:20px;
+            color: #333;
         }
 
         .input-group{
@@ -42,6 +43,7 @@
             display:block;
             margin-bottom:5px;
             font-size:14px;
+            color: #667;
         }
 
         .input-group input{
@@ -49,6 +51,11 @@
             padding:10px;
             border-radius:5px;
             border:1px solid #ccc;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #667eea;
         }
 
         .login-btn{
@@ -60,6 +67,7 @@
             color:white;
             font-size:16px;
             cursor:pointer;
+            transition: background 0.3s;
         }
 
         .login-btn:hover{
@@ -75,6 +83,7 @@
         .signup-link a{
             color:#667eea;
             text-decoration:none;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -84,16 +93,15 @@
 <div class="login-container">
     <h2>Login</h2>
 
-    <!-- AFTER LOGIN → GO TO INDEX -->
-    <form action="../index.html">
+    <form id="loginForm">
         <div class="input-group">
             <label>Email</label>
-            <input type="email" required>
+            <input type="email" id="email" placeholder="Enter your email" required>
         </div>
 
         <div class="input-group">
             <label>Password</label>
-            <input type="password" required>
+            <input type="password" id="password" placeholder="Enter password" required>
         </div>
 
         <button type="submit" class="login-btn">Login</button>
@@ -103,6 +111,8 @@
         Don't have an account? <a href="signup.html">Sign up</a>
     </div>
 </div>
+
+<script src="login.js"></script>
 
 </body>
 </html>
