@@ -1,3 +1,5 @@
+// -------------------- INDEX (PROJECT PAGE) --------------------
+
 document.addEventListener('DOMContentLoaded', () => {
     loadInitialTasks();
     setupDragAndDrop();
@@ -165,4 +167,71 @@ function getDragAfterElement(container, y) {
         const offset = y - box.top - box.height / 2;
         return (offset < 0 && offset > closest.offset) ? { offset: offset, element: child } : closest;
     }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// -------------------- AUTHENTICATION --------------------
+
+// Detect current page
+const path = window.location.pathname;
+
+// -------- LOGIN PAGE --------
+if (path.includes('login.html')) {
+    const loginForm = document.querySelector('form');
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const email = document.querySelector('input[type="email"]').value;
+        const password = document.querySelector('input[type="password"]').value;
+
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        const user = users.find(u => u.email === email && u.password === password);
+
+        if (user) {
+            alert("Login successful! Redirecting...");
+            localStorage.setItem('loggedInUser', JSON.stringify(user)); // Save session
+            window.location.href = "../index.html";
+        } else {
+            alert("Incorrect login details. Sign up if you're new!");
+        }
+    });
+}
+
+// -------- SIGNUP PAGE --------
+if (path.includes('signup.html')) {
+    const signupForm = document.querySelector('form');
+    signupForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const name = document.querySelector('input[type="text"]').value;
+        const email = document.querySelector('input[type="email"]').value;
+        const password = document.querySelectorAll('input[type="password"]')[0].value;
+        const confirmPassword = document.querySelectorAll('input[type="password"]')[1].value;
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return;
+        }
+
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        if (users.some(u => u.email === email)) {
+            alert("This email is already registered. Please login.");
+            return;
+        }
+
+        const newUser = { name, email, password };
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+
+        alert("Account created successfully! Redirecting to login...");
+        window.location.href = "login.html";
+    });
+}
+
+// -------- INDEX PAGE --------
+if (path.includes('index.html')) {
+    const loggedIn = JSON.parse(localStorage.getItem('loggedInUser'));
+    if (!loggedIn) {
+        alert("You must login first!");
+        window.location.href = "pages/login.html";
+    }
 }
