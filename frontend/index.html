@@ -23,20 +23,23 @@
                     <h2>To Do</h2>
                     <span class="count">3</span>
                 </div>
-                <div class="task-list" id="todo-list">
-                    <div class="task-card" draggable="true">
+
+                <!-- ✅ Added data-column-id -->
+                <div class="task-list" id="todo-list" data-column-id="1">
+                    <div class="task-card" draggable="true" data-task-id="1">
                         <div class="tag design">Design</div>
                         <p>Draft wireframes for the new landing page.</p>
                     </div>
-                    <div class="task-card" draggable="true">
+                    <div class="task-card" draggable="true" data-task-id="2">
                         <div class="tag research">Research</div>
                         <p>Competitor analysis report.</p>
                     </div>
-                    <div class="task-card" draggable="true">
+                    <div class="task-card" draggable="true" data-task-id="3">
                         <div class="tag dev">Dev</div>
                         <p>Set up GitHub repository.</p>
                     </div>
                 </div>
+
                 <button class="add-task-btn">+ Add Task</button>
             </div>
 
@@ -46,16 +49,18 @@
                     <h2>Doing</h2>
                     <span class="count">2</span>
                 </div>
-                <div class="task-list" id="doing-list">
-                    <div class="task-card" draggable="true">
+
+                <div class="task-list" id="doing-list" data-column-id="2">
+                    <div class="task-card" draggable="true" data-task-id="4">
                         <div class="tag dev">Dev</div>
                         <p>Integrate API endpoints.</p>
                     </div>
-                    <div class="task-card" draggable="true">
+                    <div class="task-card" draggable="true" data-task-id="5">
                         <div class="tag design">Design</div>
                         <p>Create icon assets.</p>
                     </div>
                 </div>
+
                 <button class="add-task-btn">+ Add Task</button>
             </div>
 
@@ -65,18 +70,25 @@
                     <h2>Done</h2>
                     <span class="count">1</span>
                 </div>
-                <div class="task-list" id="done-list">
-                    <div class="task-card" draggable="true">
+
+                <div class="task-list" id="done-list" data-column-id="3">
+                    <div class="task-card" draggable="true" data-task-id="6">
                         <div class="tag marketing">Marketing</div>
                         <p>Finalize email copy.</p>
                     </div>
                 </div>
+
                 <button class="add-task-btn">+ Add Task</button>
             </div>
 
         </div>
     </div>
 
+    <!-- ✅ Axios FIRST -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- ✅ Your Script SECOND -->
     <script src="script.js"></script>
+
 </body>
 </html>

@@ -8,10 +8,31 @@ document.addEventListener('DOMContentLoaded', () => {
             draggable.classList.add('dragging');
         });
 
-        draggable.addEventListener('dragend', () => {
-            draggable.classList.remove('dragging');
-            updateCounts(); // Update numbers when dropped
+        draggable.addEventListener('dragend', async () => {
+    draggable.classList.remove('dragging');
+    updateCounts();
+
+    const taskId = draggable.dataset.taskId;
+    const column = draggable.closest('.task-list');
+    const columnId = column.dataset.columnId;
+
+    const order = [...column.querySelectorAll('.task-card')]
+        .indexOf(draggable);
+
+    try {
+        await axios.put(`http://localhost:8000/tasks/${taskId}/move`, null, {
+            params: {
+                column_id: columnId,
+                order: order
+            }
         });
+
+        console.log("Task updated");
+    } catch (error) {
+        console.error("Update failed", error);
+    }
+});
+
     });
 
     // Add event listeners to drop zones (the columns)
