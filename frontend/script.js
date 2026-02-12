@@ -1,36 +1,49 @@
 // -------------------- INDEX (PROJECT PAGE) --------------------
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadInitialTasks();
+    loadTasksFromBackend();   // ✅ BACKEND NOW
     setupDragAndDrop();
+
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.menu-container')) {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.remove('show');
-            });
+            document.querySelectorAll('.dropdown-menu')
+                .forEach(menu => menu.classList.remove('show'));
         }
     });
 });
 
+
 let currentColumnId = null;
 
-function saveToBackend(taskData) {
-    console.log("SENDING TO BACKEND:", JSON.stringify(taskData, null, 2));
-    createTaskCard(taskData);
-    closeModal();
-    updateCounts();
+async function saveToBackend(taskData) {
+    try {
+        const response = await axios.post(`${API_URL}/tasks`, taskData);
+
+        createTaskCard(response.data);  // DB response
+        closeModal();
+        updateCounts();
+
+    } catch (error) {
+        console.error("Error saving task:", error);
+    }
 }
 
-function loadInitialTasks() {
-    const starterTasks = [
-        { id: 'task-1', title: 'Search inspirations for upcoming project', tag: 'website', status: 'todo' },
-        { id: 'task-2', title: 'Ginko mobile app design', tag: 'mobile', status: 'todo' },
-        { id: 'task-3', title: 'Weihu product task and process', tag: 'product', status: 'doing' },
-        { id: 'task-4', title: 'Affitto product full service', tag: 'marketing', status: 'done' }
-    ];
-    starterTasks.forEach(task => createTaskCard(task));
-    updateCounts();
+
+async function loadTasksFromBackend() {
+    try {
+        const response = await axios.get(`${API_URL}/tasks`);
+        const tasks = response.data;
+
+        tasks.forEach(task => {
+            createTaskCard(task);
+        });
+
+        updateCounts();
+    } catch (error) {
+        console.error("Error loading tasks:", error);
+    }
 }
+
 
 function createTaskCard(task) {
     const list = document.getElementById(`${task.status}-list`);
@@ -83,30 +96,49 @@ function confirmAddTask() {
     if (!title || !currentColumnId) return;
 
     const newTask = {
-        id: 'task-' + Date.now(),
         title: title,
         tag: tag,
         status: currentColumnId
     };
+
     saveToBackend(newTask);
 }
 
-function deleteTask(taskId) {
-    if (confirm('Are you sure you want to delete this task?')) {
+async function deleteTask(taskId) {
+    if (!confirm('Are you sure you want to delete this task?')) return;
+
+    try {
+        await axios.delete(`${API_URL}/tasks/${taskId}`);
+
         document.getElementById(taskId).remove();
         updateCounts();
+
+    } catch (error) {
+        console.error("Delete failed:", error);
     }
 }
 
-function editTask(taskId) {
+async function editTask(taskId) {
     const card = document.getElementById(taskId);
     const textElement = card.querySelector('.task-text');
+
     const newText = prompt("Edit task:", textElement.innerText);
-    if (newText) {
-        textElement.innerText = newText;
+    if (!newText) return;
+
+    try {
+        const response = await axios.put(`${API_URL}/tasks/${taskId}`, {
+            title: newText
+        });
+
+        textElement.innerText = response.data.title;
+
+    } catch (error) {
+        console.error("Edit failed:", error);
     }
+
     toggleMenu(`menu-${taskId}`);
 }
+
 
 function toggleMenu(menuId) {
     document.querySelectorAll('.dropdown-menu').forEach(m => {

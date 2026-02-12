@@ -1,42 +1,92 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
-from models import Task
+
 from database import get_session
+from models import Task, Column
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
+@router.get("/")
+def get_tasks(session: Session = Depends(get_session)):
+    tasks = session.exec(select(Task)).all()
 
-@router.put("/{task_id}/move")
-def move_task(
-    task_id: int,
-    column_id: int,
-    order: int,
-    session: Session = Depends(get_session)
-):
-    task = session.get(Task, task_id)
+    result = []
+    for task in tasks:
+        column = session.get(Column, task.column_id)
 
+        result.append({
+            "id": f"task-{task.id}",
+            "title": task.title,
+            "tag": task.tag,
+            "status": column.name.lower()
+        })
+
+    return result
+
+@router.post("/")
+def create_task(data: dict, session: Session = Depends(get_session)):
+
+    status = data.get("status")
+
+    column = session.exec(
+        select(Column).where(Column.name == status.capitalize())
+    ).first()
+
+    if not column:
+        raise HTTPException(400, "Column not found")
+
+    task = Task(
+        title=data.get("title"),
+        tag=data.get("tag"),
+        column_id=column.id
+    )
+
+    session.add(task)
+    session.commit()
+    session.refresh(task)
+
+    return {
+        "id": f"task-{task.id}",
+        "title": task.title,
+        "tag": task.tag,
+        "status": status
+    }
+
+@router.delete("/{task_id}")
+def delete_task(task_id: str, session: Session = Depends(get_session)):
+
+    db_id = int(task_id.replace("task-", ""))
+
+    task = session.get(Task, db_id)
     if not task:
-        return {"error": "Task not found"}
+        raise HTTPException(404, "Task not found")
 
-    # ✅ Get tasks in target column
-    tasks_in_column = session.exec(
-        select(Task)
-        .where(Task.column_id == column_id)
-        .order_by(Task.order)
-    ).all()
-
-    # ✅ Remove moving task if already inside column
-    tasks_in_column = [t for t in tasks_in_column if t.id != task_id]
-
-    # ✅ Insert task at new position
-    tasks_in_column.insert(order, task)
-
-    # ✅ Recalculate order cleanly
-    for index, t in enumerate(tasks_in_column):
-        t.order = index
-        t.column_id = column_id
-        session.add(t)
-
+    session.delete(task)
     session.commit()
 
-    return {"message": "Task moved successfully"}
+    return {"message": "Task deleted"}
+
+@router.put("/{task_id}")
+def update_task(task_id: str, data: dict, session: Session = Depends(get_session)):
+
+    db_id = int(task_id.replace("task-", ""))
+
+    task = session.get(Task, db_id)
+    if not task:
+        raise HTTPException(404, "Task not found")
+
+    if "title" in data:
+        task.title = data["title"]
+
+    session.add(task)
+    session.commit()
+    session.refresh(task)
+
+    column = session.get(Column, task.column_id)
+
+    return {
+        "id": f"task-{task.id}",
+        "title": task.title,
+        "tag": task.tag,
+        "status": column.name.lower()
+    }
