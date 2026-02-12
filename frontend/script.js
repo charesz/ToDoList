@@ -1,59 +1,112 @@
-// -------------------- INDEX (PROJECT PAGE) --------------------
+// -------------------- CONFIG --------------------
+const API_URL = "http://127.0.0.1:8000";
 
+// -------------------- GLOBAL --------------------
+let currentColumnId = null;
+
+// -------------------- DOM CONTENT LOADED --------------------
 document.addEventListener('DOMContentLoaded', () => {
-    loadTasksFromBackend();   // ✅ BACKEND NOW
+    // -------------------- AUTH CHECK --------------------
+    const path = window.location.pathname;
+    if (path.includes('index.html')) {
+        const loggedIn = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (!loggedIn) {
+            alert("You must login first!");
+            window.location.href = "pages/login.html";
+            return; // stop further execution
+        }
+    }
+
+    // -------------------- ADD NEW TASK BUTTONS --------------------
+    // Use event delegation to ensure it works reliably
+    document.body.addEventListener('click', (e) => {
+        if (e.target.classList.contains('add-task-btn')) {
+            const columnId = e.target.dataset.column;
+            openModal(columnId);
+        }
+    });
+
+    // -------------------- LOAD TASKS --------------------
+    loadTasksFromBackend();
+
+    // -------------------- DRAG & DROP --------------------
     setupDragAndDrop();
 
+    // -------------------- CLOSE DROPDOWNS --------------------
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.menu-container')) {
             document.querySelectorAll('.dropdown-menu')
                 .forEach(menu => menu.classList.remove('show'));
         }
     });
+
+    // -------------------- LOGIN / SIGNUP FORMS --------------------
+    setupAuthForms(path);
 });
 
 
-let currentColumnId = null;
-
+// -------------------- BACKEND INTERACTION --------------------
 async function saveToBackend(taskData) {
     try {
         const response = await axios.post(`${API_URL}/tasks`, taskData);
-
-        createTaskCard(response.data);  // DB response
+        createTaskCard(response.data);
         closeModal();
         updateCounts();
-
     } catch (error) {
         console.error("Error saving task:", error);
+        alert("Failed to create task. Check console.");
     }
 }
-
 
 async function loadTasksFromBackend() {
     try {
         const response = await axios.get(`${API_URL}/tasks`);
         const tasks = response.data;
-
-        tasks.forEach(task => {
-            createTaskCard(task);
-        });
-
+        tasks.forEach(task => createTaskCard(task));
         updateCounts();
     } catch (error) {
         console.error("Error loading tasks:", error);
+        alert("Failed to load tasks from backend.");
     }
 }
 
+async function deleteTask(taskId) {
+    if (!confirm('Are you sure you want to delete this task?')) return;
+    try {
+        await axios.delete(`${API_URL}/tasks/${taskId}`);
+        document.getElementById(taskId).remove();
+        updateCounts();
+    } catch (error) {
+        console.error("Delete failed:", error);
+        alert("Failed to delete task.");
+    }
+}
 
+async function editTask(taskId) {
+    const card = document.getElementById(taskId);
+    const textElement = card.querySelector('.task-text');
+    const newText = prompt("Edit task:", textElement.innerText);
+    if (!newText) return;
+
+    try {
+        const response = await axios.put(`${API_URL}/tasks/${taskId}`, { title: newText });
+        textElement.innerText = response.data.title;
+    } catch (error) {
+        console.error("Edit failed:", error);
+        alert("Failed to edit task.");
+    }
+    toggleMenu(`menu-${taskId}`);
+}
+
+// -------------------- TASK CARD --------------------
 function createTaskCard(task) {
     const list = document.getElementById(`${task.status}-list`);
     const menuId = `menu-${task.id}`;
-    
-    // UPDATED HTML STRUCTURE WITH IMAGES
+
     const cardHTML = `
         <div class="task-card" draggable="true" id="${task.id}" data-status="${task.status}">
             <div class="card-header">
-                <span class="tag ${task.tag}">#${task.tag}</span>
+                <span class="tag ${task.tag}">#${task.tag || 'general'}</span>
                 <div class="menu-container">
                     <button class="menu-btn" onclick="toggleMenu('${menuId}')">&#8942;</button>
                     <div class="dropdown-menu" id="${menuId}">
@@ -63,20 +116,13 @@ function createTaskCard(task) {
                 </div>
             </div>
             <p class="task-text">${task.title}</p>
-            
-            <div class="card-footer" style="margin-top: 12px; display: flex; align-items: center;">
-                <img src="https://i.pravatar.cc/150?u=${task.id}1" class="avatar" alt="User">
-                <img src="https://i.pravatar.cc/150?u=${task.id}2" class="avatar" style="margin-left: -10px;" alt="User">
-                <img src="https://i.pravatar.cc/150?u=${task.id}3" class="avatar" style="margin-left: -10px;" alt="User">
-            </div>
         </div>
     `;
-
     list.insertAdjacentHTML('beforeend', cardHTML);
-    const newCard = document.getElementById(task.id);
-    addDragEvents(newCard);
+    addDragEvents(document.getElementById(task.id));
 }
 
+// -------------------- MODAL --------------------
 function openModal(columnId) {
     currentColumnId = columnId;
     document.getElementById('newTaskInput').value = '';
@@ -93,59 +139,21 @@ function confirmAddTask() {
     const title = document.getElementById('newTaskInput').value.trim();
     const tag = document.getElementById('newTagInput').value;
 
-    if (!title || !currentColumnId) return;
-
-    const newTask = {
-        title: title,
-        tag: tag,
-        status: currentColumnId
-    };
-
-    saveToBackend(newTask);
-}
-
-async function deleteTask(taskId) {
-    if (!confirm('Are you sure you want to delete this task?')) return;
-
-    try {
-        await axios.delete(`${API_URL}/tasks/${taskId}`);
-
-        document.getElementById(taskId).remove();
-        updateCounts();
-
-    } catch (error) {
-        console.error("Delete failed:", error);
-    }
-}
-
-async function editTask(taskId) {
-    const card = document.getElementById(taskId);
-    const textElement = card.querySelector('.task-text');
-
-    const newText = prompt("Edit task:", textElement.innerText);
-    if (!newText) return;
-
-    try {
-        const response = await axios.put(`${API_URL}/tasks/${taskId}`, {
-            title: newText
-        });
-
-        textElement.innerText = response.data.title;
-
-    } catch (error) {
-        console.error("Edit failed:", error);
+    if (!title || !currentColumnId) {
+        alert("Please enter a task title.");
+        return;
     }
 
-    toggleMenu(`menu-${taskId}`);
+    saveToBackend({ title, tag, status: currentColumnId });
 }
 
-
+// -------------------- DROPDOWN & COUNTS --------------------
 function toggleMenu(menuId) {
     document.querySelectorAll('.dropdown-menu').forEach(m => {
-        if(m.id !== menuId) m.classList.remove('show');
+        if (m.id !== menuId) m.classList.remove('show');
     });
     const menu = document.getElementById(menuId);
-    if(menu) menu.classList.toggle('show');
+    if (menu) menu.classList.toggle('show');
 }
 
 function updateCounts() {
@@ -156,6 +164,7 @@ function updateCounts() {
     });
 }
 
+// -------------------- DRAG & DROP --------------------
 function setupDragAndDrop() {
     const droppables = document.querySelectorAll('.task-list');
     droppables.forEach(zone => {
@@ -163,33 +172,16 @@ function setupDragAndDrop() {
             e.preventDefault();
             const afterElement = getDragAfterElement(zone, e.clientY);
             const draggable = document.querySelector('.dragging');
-            zone.parentElement.classList.add('drag-over');
-            if (afterElement == null) {
-                zone.appendChild(draggable);
-            } else {
-                zone.insertBefore(draggable, afterElement);
-            }
+            if (!afterElement) zone.appendChild(draggable);
+            else zone.insertBefore(draggable, afterElement);
         });
-        zone.addEventListener('dragleave', () => zone.parentElement.classList.remove('drag-over'));
-        zone.addEventListener('drop', (e) => {
-            zone.parentElement.classList.remove('drag-over');
-            const draggable = document.querySelector('.dragging');
-            const newStatus = zone.id.replace('-list', '');
-            const oldStatus = draggable.getAttribute('data-status');
-            if (newStatus !== oldStatus) {
-                draggable.setAttribute('data-status', newStatus);
-            }
-            updateCounts();
-        });
+        zone.addEventListener('drop', () => updateCounts());
     });
 }
 
 function addDragEvents(card) {
     card.addEventListener('dragstart', () => card.classList.add('dragging'));
-    card.addEventListener('dragend', () => {
-        card.classList.remove('dragging');
-        updateCounts();
-    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
 }
 
 function getDragAfterElement(container, y) {
@@ -197,73 +189,51 @@ function getDragAfterElement(container, y) {
     return draggableElements.reduce((closest, child) => {
         const box = child.getBoundingClientRect();
         const offset = y - box.top - box.height / 2;
-        return (offset < 0 && offset > closest.offset) ? { offset: offset, element: child } : closest;
+        return (offset < 0 && offset > closest.offset) ? { offset, element: child } : closest;
     }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
 // -------------------- AUTHENTICATION --------------------
+function setupAuthForms(path) {
+    if (path.includes('login.html')) {
+        const loginForm = document.getElementById('loginForm');
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
 
-// Detect current page
-const path = window.location.pathname;
+            try {
+                const response = await axios.post(`${API_URL}/tasks/login`, { email, password });
+                localStorage.setItem('loggedInUser', JSON.stringify(response.data));
+                alert("Login successful!");
+                window.location.href = "../index.html";
+            } catch (error) {
+                alert(error.response?.data?.detail || "Login failed");
+            }
+        });
+    }
 
-// -------- LOGIN PAGE --------
-if (path.includes('login.html')) {
-    const loginForm = document.querySelector('form');
-    loginForm.addEventListener('submit', function(e) {
-        e.preventDefault();
+    if (path.includes('signup.html')) {
+        const signupForm = document.getElementById('signupForm');
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
 
-        const email = document.querySelector('input[type="email"]').value;
-        const password = document.querySelector('input[type="password"]').value;
+            if (password !== confirmPassword) {
+                alert("Passwords do not match!");
+                return;
+            }
 
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        const user = users.find(u => u.email === email && u.password === password);
-
-        if (user) {
-            alert("Login successful! Redirecting...");
-            localStorage.setItem('loggedInUser', JSON.stringify(user)); // Save session
-            window.location.href = "../index.html";
-        } else {
-            alert("Incorrect login details. Sign up if you're new!");
-        }
-    });
-}
-
-// -------- SIGNUP PAGE --------
-if (path.includes('signup.html')) {
-    const signupForm = document.querySelector('form');
-    signupForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const name = document.querySelector('input[type="text"]').value;
-        const email = document.querySelector('input[type="email"]').value;
-        const password = document.querySelectorAll('input[type="password"]')[0].value;
-        const confirmPassword = document.querySelectorAll('input[type="password"]')[1].value;
-
-        if (password !== confirmPassword) {
-            alert("Passwords do not match!");
-            return;
-        }
-
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        if (users.some(u => u.email === email)) {
-            alert("This email is already registered. Please login.");
-            return;
-        }
-
-        const newUser = { name, email, password };
-        users.push(newUser);
-        localStorage.setItem('users', JSON.stringify(users));
-
-        alert("Account created successfully! Redirecting to login...");
-        window.location.href = "login.html";
-    });
-}
-
-// -------- INDEX PAGE --------
-if (path.includes('index.html')) {
-    const loggedIn = JSON.parse(localStorage.getItem('loggedInUser'));
-    if (!loggedIn) {
-        alert("You must login first!");
-        window.location.href = "pages/login.html";
+            try {
+                await axios.post(`${API_URL}/tasks/signup`, { name, email, password });
+                alert("Account created successfully!");
+                window.location.href = "login.html";
+            } catch (error) {
+                alert(error.response?.data?.detail || "Signup failed");
+            }
+        });
     }
 }

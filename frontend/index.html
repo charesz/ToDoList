@@ -9,73 +9,71 @@
 </head>
 <body>
 
-    <div class="app-container">
-        <header>
-            <h1>Kanban Board</h1>
-            <p>Project management task board.</p>
-        </header>
+<div class="app-container">
+    <header>
+        <h1>Kanban Board</h1>
+        <p>Project management task board.</p>
+    </header>
 
-        <div class="board">
-            
-            <div class="column" id="todo">
-                <div class="column-header">
-                    <div class="header-title">
-                        <h2>Todo list</h2>
-                        <span class="count">0</span>
-                    </div>
-                    </div>
-                <div class="task-list" id="todo-list"></div>
-                <button class="add-task-btn" onclick="openModal('todo')">+ Add new task</button>
+    <div class="board">
+        <div class="column" id="todo">
+            <div class="column-header">
+                <div class="header-title">
+                    <h2>Todo list</h2>
+                    <span class="count">0</span>
+                </div>
             </div>
+            <div class="task-list" id="todo-list"></div>
+            <button class="add-task-btn" data-column="todo">+ Add new task</button>
+        </div>
 
-            <div class="column" id="doing">
-                <div class="column-header">
-                    <div class="header-title">
-                        <h2>In Progress</h2>
-                        <span class="count">0</span>
-                    </div>
-                    </div>
-                <div class="task-list" id="doing-list"></div>
-                <button class="add-task-btn" onclick="openModal('doing')">+ Add new task</button>
+        <div class="column" id="doing">
+            <div class="column-header">
+                <div class="header-title">
+                    <h2>In Progress</h2>
+                    <span class="count">0</span>
+                </div>
             </div>
+            <div class="task-list" id="doing-list"></div>
+            <button class="add-task-btn" data-column="doing">+ Add new task</button>
+        </div>
 
-            <div class="column" id="done">
-                <div class="column-header">
-                    <div class="header-title">
-                        <h2>Done</h2>
-                        <span class="count">0</span>
-                    </div>
-                    </div>
-                <div class="task-list" id="done-list"></div>
-                <button class="add-task-btn" onclick="openModal('done')">+ Add new task</button>
+        <div class="column" id="done">
+            <div class="column-header">
+                <div class="header-title">
+                    <h2>Done</h2>
+                    <span class="count">0</span>
+                </div>
             </div>
-
+            <div class="task-list" id="done-list"></div>
+            <button class="add-task-btn" data-column="done">+ Add new task</button>
         </div>
     </div>
+</div>
 
-    <div id="taskModal" class="modal">
-        <div class="modal-content">
-            <h3>Create New Task</h3>
-            <input type="text" id="newTaskInput" placeholder="Task title..." autocomplete="off">
-            <div class="modal-tags">
-                <label style="display:block; margin-bottom:10px; font-weight:600; color:#475569;">Tag</label>
-                <select id="newTagInput">
-                    <option value="website">Website</option>
-                    <option value="mobile">Mobile App</option>
-                    <option value="product">Product</option>
-                    <option value="design">Design</option>
-                    <option value="marketing">Marketing</option>
-                </select>
-            </div>
-            <div class="modal-actions">
-                <button class="cancel-btn" onclick="closeModal()">Cancel</button>
-                <button class="save-btn" onclick="confirmAddTask()">Create Task</button>
-            </div>
+<!-- Modal -->
+<div id="taskModal" class="modal">
+    <div class="modal-content">
+        <h3>Create New Task</h3>
+        <input type="text" id="newTaskInput" placeholder="Task title..." autocomplete="off">
+        <div class="modal-tags">
+            <label style="display:block; margin-bottom:10px; font-weight:600; color:#475569;">Tag</label>
+            <select id="newTagInput">
+                <option value="website">Website</option>
+                <option value="mobile">Mobile App</option>
+                <option value="product">Product</option>
+                <option value="design">Design</option>
+                <option value="marketing">Marketing</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+            <button class="save-btn" onclick="confirmAddTask()">Create Task</button>
         </div>
     </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="script.js"></script>
-
 </body>
 </html>
