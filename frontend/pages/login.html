@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kanban</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body{
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background: linear-gradient(135deg, hwb(179 39% 18% / 0.836), #856da4d8);
+        }
+
+        .login-container{
+            background:#fff;
+            width:350px;
+            padding:40px;
+            border-radius:10px;
+            box-shadow:0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .login-container h2{
+            text-align:center;
+            margin-bottom:20px;
+        }
+
+        .input-group{
+            margin-bottom:15px;
+        }
+
+        .input-group label{
+            display:block;
+            margin-bottom:5px;
+            font-size:14px;
+        }
+
+        .input-group input{
+            width:100%;
+            padding:10px;
+            border-radius:5px;
+            border:1px solid #ccc;
+        }
+
+        .login-btn{
+            width:100%;
+            padding:12px;
+            border:none;
+            border-radius:5px;
+            background:#667eea;
+            color:white;
+            font-size:16px;
+            cursor:pointer;
+        }
+
+        .login-btn:hover{
+            background:#5a67d8;
+        }
+
+        .signup-link{
+            text-align:center;
+            margin-top:15px;
+            font-size:14px;
+        }
+
+        .signup-link a{
+            color:#667eea;
+            text-decoration:none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-container">
+    <h2>Login</h2>
+
+    <!-- AFTER LOGIN → GO TO INDEX -->
+    <form action="../index.html">
+        <div class="input-group">
+            <label>Email</label>
+            <input type="email" required>
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" required>
+        </div>
+
+        <button type="submit" class="login-btn">Login</button>
+    </form>
+
+    <div class="signup-link">
+        Don't have an account? <a href="signup.html">Sign up</a>
+    </div>
+</div>
+
+</body>
+</html>
