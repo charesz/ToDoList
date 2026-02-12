@@ -3,77 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kanban To-Do Board</title>
+    <title>Weihu Kanban Board</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <div class="app-container">
         <header>
-            <h1>Project Tracker</h1>
-            <p>Drag and drop cards to update their status.</p>
+            <h1>Kanban Board</h1>
+            <p>Project management task board.</p>
         </header>
 
         <div class="board">
             
             <div class="column" id="todo">
                 <div class="column-header">
-                    <span class="dot todo-color"></span>
-                    <h2>To Do</h2>
-                    <span class="count">3</span>
-                </div>
-                <div class="task-list" id="todo-list">
-                    <div class="task-card" draggable="true">
-                        <div class="tag design">Design</div>
-                        <p>Draft wireframes for the new landing page.</p>
+                    <div class="header-title">
+                        <h2>Todo list</h2>
+                        <span class="count">0</span>
                     </div>
-                    <div class="task-card" draggable="true">
-                        <div class="tag research">Research</div>
-                        <p>Competitor analysis report.</p>
                     </div>
-                    <div class="task-card" draggable="true">
-                        <div class="tag dev">Dev</div>
-                        <p>Set up GitHub repository.</p>
-                    </div>
-                </div>
-                <button class="add-task-btn">+ Add Task</button>
+                <div class="task-list" id="todo-list"></div>
+                <button class="add-task-btn" onclick="openModal('todo')">+ Add new task</button>
             </div>
 
             <div class="column" id="doing">
                 <div class="column-header">
-                    <span class="dot doing-color"></span>
-                    <h2>Doing</h2>
-                    <span class="count">2</span>
-                </div>
-                <div class="task-list" id="doing-list">
-                    <div class="task-card" draggable="true">
-                        <div class="tag dev">Dev</div>
-                        <p>Integrate API endpoints.</p>
+                    <div class="header-title">
+                        <h2>In Progress</h2>
+                        <span class="count">0</span>
                     </div>
-                    <div class="task-card" draggable="true">
-                        <div class="tag design">Design</div>
-                        <p>Create icon assets.</p>
                     </div>
-                </div>
-                <button class="add-task-btn">+ Add Task</button>
+                <div class="task-list" id="doing-list"></div>
+                <button class="add-task-btn" onclick="openModal('doing')">+ Add new task</button>
             </div>
 
             <div class="column" id="done">
                 <div class="column-header">
-                    <span class="dot done-color"></span>
-                    <h2>Done</h2>
-                    <span class="count">1</span>
-                </div>
-                <div class="task-list" id="done-list">
-                    <div class="task-card" draggable="true">
-                        <div class="tag marketing">Marketing</div>
-                        <p>Finalize email copy.</p>
+                    <div class="header-title">
+                        <h2>Done</h2>
+                        <span class="count">0</span>
                     </div>
-                </div>
-                <button class="add-task-btn">+ Add Task</button>
+                    </div>
+                <div class="task-list" id="done-list"></div>
+                <button class="add-task-btn" onclick="openModal('done')">+ Add new task</button>
             </div>
 
+        </div>
+    </div>
+
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <h3>Create New Task</h3>
+            <input type="text" id="newTaskInput" placeholder="Task title..." autocomplete="off">
+            <div class="modal-tags">
+                <label style="display:block; margin-bottom:10px; font-weight:600; color:#475569;">Tag</label>
+                <select id="newTagInput">
+                    <option value="website">Website</option>
+                    <option value="mobile">Mobile App</option>
+                    <option value="product">Product</option>
+                    <option value="design">Design</option>
+                    <option value="marketing">Marketing</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+                <button class="save-btn" onclick="confirmAddTask()">Create Task</button>
+            </div>
         </div>
     </div>
 
