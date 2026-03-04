@@ -10,7 +10,7 @@ from main import app
 from database import get_session
 from models import User, Task, Column, Board
 
-# -------------------- IN-MEMORY DB WITH SINGLE CONNECTION --------------------
+#  IN-MEMORY DB WITH SINGLE CONNECTION 
 TEST_DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
 connection = engine.connect()  # Persistent connection for in-memory DB
@@ -25,7 +25,7 @@ def get_test_session():
 
 app.dependency_overrides[get_session] = get_test_session
 
-# -------------------- PRE-CREATE BOARD AND COLUMNS --------------------
+#  PRE-CREATE BOARD AND COLUMNS 
 with Session(connection) as session:
     board = Board(name="Main Board")
     session.add(board)
@@ -38,10 +38,10 @@ with Session(connection) as session:
     session.add_all([todo_col, doing_col, done_col])
     session.commit()
 
-# -------------------- TEST CLIENT --------------------
+# TEST CLIENT 
 client = TestClient(app)
 
-# -------------------- USER TESTS --------------------
+# USER TESTS 
 def test_signup_login_flow():
     # Signup
     response = client.post("/tasks/signup", json={"name": "Alice", "email": "alice@test.com", "password": "pass"})
@@ -64,7 +64,7 @@ def test_signup_login_flow():
     response = client.post("/tasks/login", json={"email": "alice@test.com", "password": "wrong"})
     assert response.status_code == 401
 
-# -------------------- TASK TESTS --------------------
+#  TASK TESTS 
 def test_task_crud_and_status():
     # Create task in Todo
     response = client.post("/tasks/", json={"title": "Task1", "tag": "urgent", "status": "todo"})
@@ -110,7 +110,7 @@ def test_task_crud_and_status():
     data = response.json()
     assert data["message"] == "Task deleted"
 
-# -------------------- EDGE CASES --------------------
+#  EDGE CASES 
 def test_invalid_task_creation():
     response = client.post("/tasks/", json={"title": "Invalid Task", "status": "nonexistent"})
     assert response.status_code == 400
